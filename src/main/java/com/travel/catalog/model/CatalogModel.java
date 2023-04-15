@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "tb_packages")
+@Table(name = "tbl_packages")
 public class CatalogModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
