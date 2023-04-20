@@ -1,11 +1,17 @@
 package com.travel.catalog.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
+@Getter
+@Setter
+@Builder
 @Entity
 @Table(name = "tbl_packages")
+@AllArgsConstructor
+@NoArgsConstructor
 public class CatalogModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,57 +28,7 @@ public class CatalogModel {
     private Integer availability;
 
     @Column(name = "date")
-    private Timestamp date;
+    private Date date;
 
-    public CatalogModel() {
-    }
-
-    public CatalogModel(Integer id, String name, String price, Integer availability, Timestamp date) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.availability = availability;
-        this.date = date;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public Integer getAvailability() {
-        return availability;
-    }
-
-    public void setAvailability(Integer availability) {
-        this.availability = availability;
-    }
-
-    public Timestamp getDate() {
-        return date;
-    }
-
-    public void setDate(Timestamp date) {
-        this.date = date;
-    }
 }
 
