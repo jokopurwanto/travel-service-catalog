@@ -20,6 +20,7 @@ public class ReqExceptionHandler extends ResponseEntityExceptionHandler {
         //membyat message key value
         Map<String, Object> responeBody = new LinkedHashMap<>();
         responeBody.put("status", status.value());
+        responeBody.put("message", "data belum sesuai");
 
         //versi 1 - membuat list error dari DTO validate (Length, NotNull, NotBlank, Min, Max, dll)
 //        List<String> listErrors = new ArrayList<>();
@@ -35,7 +36,7 @@ public class ReqExceptionHandler extends ResponseEntityExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             errorMap.put(error.getField(), error.getDefaultMessage());
         });
-        responeBody.put("message", errorMap);
+        responeBody.put("data", errorMap);
 
         return new ResponseEntity<>(responeBody,headers,status);
     }

@@ -1,9 +1,13 @@
 package com.travel.catalog.dto;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Date;
 
@@ -11,8 +15,7 @@ import java.sql.Date;
 @Setter
 @Data
 @Builder
-public class CatalogDto {
-    private Integer id;
+public class CatalogCreateDto {
 
     @NotBlank(message = "Invalid Name: Empty name")
     @NotNull(message = "Invalid Name: Name is NULL")
@@ -23,13 +26,9 @@ public class CatalogDto {
     @NotNull(message = "Invalid Price: Price is NULL")
     private String price;
 
+    @NotNull(message = "Invalid Total availability: Total Person is availability")
+    private Integer availability;
+
     @NotNull(message = "Invalid Start date: Start date is NULL")
-    private Date startDate;
-
-    @NotNull(message = "Invalid End date: End date is NULL")
-    private Date endDate;
-
-    @NotNull(message = "Invalid Total Person: Total Person is NULL")
-    private Integer totalPerson;
-
+    private Date date;
 }
