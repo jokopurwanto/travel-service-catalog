@@ -58,9 +58,9 @@ public class CatalogController {
         return RespHandler.responseBuilder("sukses, data telah berhasil di-simpan",HttpStatus.OK, catalogService.createCatalog(catalogCreateDto));
     }
 
-    @PutMapping("/catalog/{id}")
-    public ResponseEntity<?> updateCatalogDetails(@RequestBody @Valid CatalogDto catalogDto, @PathVariable Integer id) throws ParseException {
-        return RespHandler.responseBuilder("sukses, data catalog telah berhasil di-update",HttpStatus.OK, catalogService.updateCatalog(catalogDto,id));
+    @PutMapping("/catalog/booking")
+    public ResponseEntity<?> updateCatalogDetails(@RequestBody @Valid CatalogDto catalogDto) throws ParseException {
+        return RespHandler.responseBuilder("sukses, data catalog telah berhasil di-update",HttpStatus.OK, catalogService.updateCatalog(catalogDto));
     }
 
     @GetMapping("/catalog/{id}")

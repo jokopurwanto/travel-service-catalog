@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface ICatalogService {
     public CatalogModel createCatalog(CatalogCreateDto catalogCreateDto);
-    public Map<String, Object> updateCatalog(CatalogDto catalogDto, Integer id) throws ParseException;
+    public Map<String, Object> updateCatalog(CatalogDto catalogDto) throws ParseException;
     public Map<String, Object> deleteCatalog(Integer id);
     public CatalogModel getCatalog(Integer id);
     public List<CatalogModel> getAllCatalog();

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional
 public class CatalogService implements ICatalogService {
 
     @Autowired
@@ -43,106 +44,74 @@ public class CatalogService implements ICatalogService {
     }
 
     @Override
-    public Map<String, Object>  updateCatalog(CatalogDto catalogDto, Integer id) throws ParseException {
+    public Map<String, Object>  updateCatalog(CatalogDto catalogDto) throws ParseException {
 
-        //jika id pada url path variable salah maka exception
-        if(catalogRepository.findById(id).isEmpty())
-            throw new CatalogNotFoundException("Data yang dicari tidak ditemukan");
+        //convert date
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate endDate = LocalDate.parse(catalogDto.getEndDate().toString(), formatter);
+        LocalDate startDate = LocalDate.parse(catalogDto.getStartDate().toString(), formatter);
+        long days = ChronoUnit.DAYS.between(startDate, endDate);
 
-        //jika id tidak di input pada body tidak sama dengan path variable maka exception
-        if(catalogDto.getId() != id)
-            throw new CatalogNotFoundException("Data id yang di-input belum sesuai");
+        //math total book
+        Integer priceMdl = Integer.parseInt(catalogDto.getPrice());
+        Integer totalPersonMdl = catalogDto.getTotalPerson();
+        Integer totalPrice = priceMdl * totalPersonMdl;
+        Integer totalBooks = Math.toIntExact(totalPersonMdl * days);
 
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        final LocalDate endDate = LocalDate.parse(catalogDto.getEndDate().toString(), formatter);
-        final LocalDate startDate = LocalDate.parse(catalogDto.getStartDate().toString(), formatter);
-        final long days = ChronoUnit.DAYS.between(startDate, endDate);
+        //convert localdate & variabel validasi availbility
+        LocalDate date = startDate;
+        Integer cekAvailbility, avail;
 
-        //print data calender
+        //print date calender & total book
         System.out.println("Start Date :"+catalogDto.getStartDate());
         System.out.println("End Date :"+catalogDto.getEndDate());
         System.out.println("Start Date Conv :"+startDate);
         System.out.println("End Date Conv :"+endDate);
-        System.out.println("Total Book Days :"+days);
+        System.out.println("Total Days :"+days);
+        System.out.println("Total Book : "+totalPersonMdl+" * "+days+" = "+totalBooks);
 
+        //validasi tanggal start dan end date
+        if(startDate.equals(endDate))
+            throw new CatalogNotFoundException("Tanggal Start dan End Date tidak bisa sama");
 
-        //validasi cek availability
-        CatalogModel catalogModel1 = catalogRepository.findById(id).get();
-        System.out.println("Total Avail :"+catalogModel1.getAvailability());
-        Integer availability = catalogModel1.getAvailability();
-        Integer cekAvail = Math.toIntExact(availability-days);
-        System.out.println("Cek Avail : "+availability+" - "+days+" = "+cekAvail);
-
-//        if(availability == 0){
-//            throw new CatalogNotFoundException("Full, saat belum ada yang kosong");
-//        } else if (cekAvail < 0) {
-//            throw new CatalogNotFoundException("Sisa ketersediaam saat ini : "+availability);
-//        }
-        if(availability == 0){
-            throw new CatalogNotFoundException("Full, saat belum ada yang kosong");
-        }
-
-
-        Integer priceMdl = Integer.parseInt(catalogDto.getPrice());
-        Integer totalPersonMdl = catalogDto.getTotalPerson();
-        Integer totalPrice = priceMdl * totalPersonMdl;
-        Integer totalBook = Math.toIntExact(totalPersonMdl * days);
-        System.out.println("Total Book : "+totalPersonMdl+" * "+days+" = "+totalBook);
-
-        LocalDate date = startDate;
-        Integer cekAvailbility;
-        Integer avail;
         while (date.isBefore(endDate) || date.equals(endDate)) {
             System.out.println("Tanggal Counter : "+ date);
             Date dateTmp = new SimpleDateFormat("yyyy-MM-dd").parse(date.toString());
             System.out.println("Tanggal CounterTmp : "+ date);
-//            CatalogModel catalogMdl = (CatalogModel) catalogRepository.findByName(catalogDto.getName());
-//            CatalogModel catalogMdl = (CatalogModel) catalogRepository.findByDate(dateTmp);
+
+            //get data if null
             if(catalogRepository.findByNameAndDate(catalogDto.getName(), dateTmp) == null)
                 throw new CatalogNotFoundException("Data yang dicari tidak ditemukan dengan tujuan " + catalogDto.getName() + " tanggal " + date);
+
+            //get data if not null
             CatalogModel catalogMdl = (CatalogModel) catalogRepository.findByNameAndDate(catalogDto.getName(), dateTmp);
             System.out.println("ketersedian : " + catalogMdl.getAvailability());
+
+            //validasi availbility
             avail = catalogMdl.getAvailability();
-            cekAvailbility = Math.toIntExact(avail-totalBook);
-            System.out.println("Cek Availbility : "+avail+" - "+totalBook+" = "+ cekAvailbility);
-           if (cekAvailbility < 0) {
-                throw new CatalogNotFoundException("Sisa ketersediaam saat ini : "+avail+" untuk tanggal "+date);
-            }
+            cekAvailbility = Math.toIntExact(avail-totalBooks);
+            System.out.println("Cek Availbility : "+avail+" - "+totalBooks+" = "+ cekAvailbility);
+            if(avail == 0)
+                throw new CatalogNotFoundException("Full, saat ini belum ada yang kosong untuk tanggal " + date);
+            if (cekAvailbility < 0)
+                throw new CatalogNotFoundException("Ketersedian untuk tanggal "+date+" tersisa "+avail);
 
-//           catalogMdl.setId(catalogDto.getId());
-//           catalogMdl.setName(catalogDto.getName());
-//           catalogMdl.setPrice(catalogDto.getPrice());
-//           catalogMdl.setAvailability(cekAvailbility);
-//           System.out.println("before insert tgl");
-           java.sql.Date sqlDate = java.sql.Date.valueOf(date);
-//           catalogMdl.setDate(sqlDate);
-//
-//           catalogRepository.save(catalogMdl);
-
-            CatalogModel catalogModel2 = CatalogModel.builder()
+            //update data
+            java.sql.Date sqlDate = java.sql.Date.valueOf(date);
+            CatalogModel catalogMdlSave = CatalogModel.builder()
                 .id(catalogMdl.getId())
                 .name(catalogMdl.getName())
                 .price(catalogMdl.getPrice())
                 .availability(cekAvailbility)
                 .date(sqlDate)
                 .build();
-            catalogRepository.save(catalogModel2);
+            catalogRepository.save(catalogMdlSave);
 
-//            catalogRepository.updateByNameAndDate(cekAvailbility,catalogDto.getName(),dateTmp);
-
+            //counter date plus 1
             date = date.plusDays(1);
         }
 
-
-        //jika id sesuai maka data akan diupdate
-//        CatalogModel catalogModel = CatalogModel.builder()
-//                .id(catalogDto.getId())
-//                .name(catalogDto.getName())
-//                .price(catalogDto.getPrice())
-//                .availability(cekAvail)
-//                .date(catalogDto.getStartDate())
-//                .build();
-//        return catalogRepository.save(catalogModel);
+        //result function
         Map<String,Object> response = new HashMap<>();
         response.put("totalPrice", totalPrice);
         response.put("totalPerson", totalPersonMdl);
