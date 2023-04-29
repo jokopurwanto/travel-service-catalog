@@ -1,5 +1,6 @@
 package com.travel.catalog.controller;
 
+import com.travel.catalog.dto.CatalogCancelOrder;
 import com.travel.catalog.dto.CatalogCreateDto;
 import com.travel.catalog.dto.CatalogDto;
 import com.travel.catalog.handler.RespHandler;
@@ -58,7 +59,12 @@ public class CatalogController {
         return RespHandler.responseBuilder("sukses, data telah berhasil di-simpan",HttpStatus.OK, catalogService.createCatalog(catalogCreateDto));
     }
 
-    @PutMapping("/catalog/booking")
+    @PostMapping("/catalog/cancel-booking")
+    public ResponseEntity<Object> createCatalogDetails(@RequestBody @Valid CatalogCancelOrder catalogCancelOrder) throws ParseException {
+        return RespHandler.responseBuilder("sukses, cancel booking telah berhasil di-simpan",HttpStatus.OK, catalogService.cancelBooking(catalogCancelOrder));
+    }
+
+    @PostMapping("/catalog/booking")
     public ResponseEntity<?> updateCatalogDetails(@RequestBody @Valid CatalogDto catalogDto) throws ParseException {
         return RespHandler.responseBuilder("sukses, data catalog telah berhasil di-update",HttpStatus.OK, catalogService.updateCatalog(catalogDto));
     }
