@@ -183,6 +183,7 @@ public class CatalogService implements ICatalogService {
 
         //result function
         Map<String,Object> response = new HashMap<>();
+        response.put("destination",catalogDto.getName());
         response.put("totalPrice", totalPrice);
         response.put("totalPerson", totalPersonMdl);
         response.put("totalDays", days);
